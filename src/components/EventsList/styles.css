@@ -1,0 +1,27 @@
+.pagination-container {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    gap: 1em;
+    align-items: center;
+    margin: 5em 1em;
+}
+
+.pagination-page-link, .pagination-next-link, .pagination-previous-link {
+    border: 1px solid black;
+    border-radius: 5px;
+    font-size: large;
+}
+
+.pagination-page-active {
+    background-color: #90CDF4;
+}
+
+.pagination-page-link {
+    padding: 2px 8px;
+}
+
+.pagination-next-link, .pagination-previous-link {
+    background-color: #E2E8F0;
+    padding: 2px 6px;
+}

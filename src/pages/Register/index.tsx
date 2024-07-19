@@ -1,0 +1,77 @@
+import { Box, Container, FormControl, FormErrorMessage, FormLabel, Heading, Text, Link as ChakraUiLink, Button, Input } from "@chakra-ui/react";
+import { Link as ReactRouterLink, useNavigate } from 'react-router-dom';
+import { Field, Form, Formik, FormikHelpers } from "formik";
+import { LoginDTO, RegisterDTO } from "../../types/user";
+import { useLoginMutation, useRegisterMutation } from "../../services/redux/auth/authApiSlice";
+import { registerSchema } from "./validation";
+import { Cookies } from "react-cookie";
+
+export default function RegisterPage() {
+    const [register] = useRegisterMutation();
+    const [login] = useLoginMutation();
+    const navigate = useNavigate();
+    const initialValues: RegisterDTO = {
+        email: '',
+        password: ''
+    }
+
+    async function handleSubmit(values: LoginDTO, { setSubmitting }: FormikHelpers<LoginDTO>) {
+        try {
+            await register(values).unwrap();
+            const tokens = await login(values).unwrap();
+            const cookies = new Cookies();
+            cookies.set('AccessToken', tokens.accessToken);
+            cookies.set('RefreshToken', tokens.refreshToken);
+            navigate('/', { replace: true });
+        }
+        catch (err) {
+            console.error(err);
+        }
+        finally {
+            setSubmitting(false);
+        }
+    }
+
+    return (
+        <Container centerContent>
+            <Box display='flex' flexDirection='column' alignItems='center'>
+                <Heading mb={10}>Register</Heading>
+            </Box>
+            <Formik initialValues={initialValues}
+            validationSchema={registerSchema}
+            onSubmit={handleSubmit}
+            >
+                {({ isSubmitting, isValid, errors, touched }) => (
+                    <Form style={{ width: 300 }}>
+                        <FormControl isInvalid={!!errors.email && touched.email}>
+                            <FormLabel>Email</FormLabel>
+                            <Field id='email' name='email' as={Input} type='text'/>
+                            <FormErrorMessage>{errors.email}</FormErrorMessage>
+                        </FormControl>
+                        <FormControl isInvalid={!!errors.password && touched.password}>
+                            <FormLabel>Password</FormLabel>
+                            <Field id='password' name='password' as={Input} type='password' />
+                            <FormErrorMessage>{errors.password}</FormErrorMessage>
+                        </FormControl>
+                        <Text fontSize={14} mt={2}>
+                            Already have an account?{' '}
+                            <ChakraUiLink color='teal.500' as={ReactRouterLink} to='/' replace>
+                            Click here to login
+                            </ChakraUiLink>
+                        </Text>
+                        <Button
+                            mt={4}
+                            width='100%'
+                            bgColor='blue.200'
+                            type='submit'
+                            isDisabled={!isValid}
+                            isLoading={isSubmitting}
+                        >
+                        Sign Up
+                        </Button>
+                    </Form>
+                )}
+            </Formik>
+        </Container>
+    )
+}
